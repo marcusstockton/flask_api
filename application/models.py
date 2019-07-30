@@ -9,56 +9,15 @@ import uuid
 from marshmallow import fields, pre_load
 from marshmallow_sqlalchemy import field_for
 from passlib.hash import pbkdf2_sha256 as sha256
+from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 
 import json
 
 from . import db, ma
 
-
-class Item(db.Model):
-	__tablename__ = 'Items'
-
-	id = db.Column(db.Integer, primary_key=True)
-	created_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
-	updated_date = db.Column(db.DateTime, onupdate=datetime.datetime.now())
-	name = db.Column(Text)
-	title = db.Column(Text)
-	description = db.Column(Text)
-	price = db.Column(Float, nullable=False)
-	reviews = db.relationship(
-        'Review',
-        backref='item',
-        cascade='all, delete, delete-orphan',
-        single_parent=True,
-        order_by='desc(Review.created_date)'
-    )
-	# created_by = relationship('User', primaryjoin='Review.CreatedById == User.Id')
-	# updated_by = relationship('User', primaryjoin='Review.UpdatedById == User.Id')
-
-	def __repr__(self):
-		return '<Item {}>'.format(self.name)
-
-
-class Review(db.Model):
-	__tablename__ = 'Review'
-
-	id = db.Column(db.Integer, primary_key=True)
-	created_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
-	updated_date = db.Column(db.DateTime, onupdate=datetime.datetime.now())
-	rating = db.Column(Integer, nullable=False)
-	title = db.Column(Text)
-	description = db.Column(Text)
-	item_id = db.Column(db.Integer, db.ForeignKey('Items.id'))
-	#item = relationship('Item', backref="item")
-	#item_id = db.Column(db.Integer, db.ForeignKey('item.id'), nullable=False)
-	#item = db.relationship('Item', backref=db.backref('reviews', lazy=True))
-	# created_by = relationship('User', primaryjoin='Review.CreatedById == User.Id')
-	# updated_by = relationship('User', primaryjoin='Review.UpdatedById == User.Id')
-
-	def __repr__(self):
-		return '<Review {}>'.format(self.Title)
-
-
+#########
+# MODELS#
+#########
 
 class User(db.Model):
 	__tablename__ = 'Users'
@@ -96,36 +55,115 @@ class User(db.Model):
 		db.session.commit()
 
 
+
+class Item(db.Model):
+	__tablename__ = 'Items'
+
+	id = db.Column(db.Integer, primary_key=True)
+	created_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
+	updated_date = db.Column(db.DateTime, onupdate=datetime.datetime.now())
+	name = db.Column(Text)
+	title = db.Column(Text)
+	description = db.Column(Text)
+	price = db.Column(Float, nullable=False)
+	reviews = db.relationship(
+		'Review',
+		backref='review',
+		cascade='all, delete, delete-orphan',
+		single_parent=True,
+		order_by='desc(Review.created_date)'
+	)
+	created_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+	updated_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+
+	created_by = db.relationship('User', primaryjoin=created_by_id == User.id)
+	updated_by = db.relationship('User', primaryjoin=updated_by_id == User.id)
+
+	def __repr__(self):
+		return '<Item {}>'.format(self.name)
+	
+	@classmethod
+	def create_item(self):
+		self.created_by = get_jwt_identity()
+		db.session.add(self)
+		db.session.commit()
+
+	@classmethod
+	def update_item(self):
+		self.updated_by = get_jwt_identity()
+		db.session.add(self)
+		db.session.commit()
+
+
+class Review(db.Model):
+	__tablename__ = 'Review'
+
+	id = db.Column(db.Integer, primary_key=True)
+	created_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
+	updated_date = db.Column(db.DateTime, onupdate=datetime.datetime.now())
+	rating = db.Column(Integer, nullable=False)
+	title = db.Column(Text)
+	description = db.Column(Text)
+	item_id = db.Column(db.Integer, db.ForeignKey('Items.id'))
+	item = relationship('Item', foreign_keys=[item_id], backref="item")
+	#item_id = db.Column(db.Integer, db.ForeignKey('item.id'), nullable=False)
+	#item = db.relationship('Item', backref=db.backref('reviews', lazy=True))
+	created_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+	updated_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+
+	created_by = db.relationship('User', primaryjoin=created_by_id == User.id, backref="created_by")
+	updated_by = db.relationship('User', primaryjoin=updated_by_id == User.id, backref="updated_by")
+
+	def __repr__(self):
+		return '<Review {}>'.format(self.Title)
+
+	@classmethod
+	def create_review(self):
+		db.session.add(self)
+		db.session.commit()
+
+
 class RevokedTokenModel(db.Model):
-    __tablename__ = 'revoked_tokens'
-    id = db.Column(db.Integer, primary_key = True)
-    jti = db.Column(db.String(120))
-    
-    def add(self):
-        db.session.add(self)
-        db.session.commit()
-    
-    @classmethod
-    def is_jti_blacklisted(cls, jti):
-        query = cls.query.filter_by(jti = jti).first()
-        return bool(query)
+	__tablename__ = 'revoked_tokens'
+	id = db.Column(db.Integer, primary_key = True)
+	jti = db.Column(db.String(120))
+	
+	def add(self):
+		db.session.add(self)
+		db.session.commit()
+	
+	@classmethod
+	def is_jti_blacklisted(cls, jti):
+		query = cls.query.filter_by(jti = jti).first()
+		return bool(query)
+
+
+##########
+# SCHEMAS#
+##########
+
+class UserSchema(ma.ModelSchema):
+	class Meta:
+		model = User
+		fields=("username", "first_name", "last_name", "date_of_birth", "id")
+		include_fk=True
 
 
 class ReviewSchema(ma.ModelSchema):
-	# CreatedBy = fields.Nested(AspNetUserSchema)
-	# UpdatedBy = fields.Nested(AspNetUserSchema)
+	created_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='created_by_id')
+	updated_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='updated_by_id')
 	
 	class Meta:
 		model = Review
+		fields=('created_date', 'rating', 'title', 'description','created_by', 'updated_by')
 		include_fk = True
 	
 
 class ItemSchema(ma.ModelSchema):
 	uppername = fields.Function(lambda obj: obj.name.upper())
-	# CreatedBy = fields.Nested(AspNetUserSchema)
-	# UpdatedBy = fields.Nested(AspNetUserSchema)
-	Reviews = fields.Nested(ReviewSchema, many=True, only=["created_date", "rating", "title", "description", "id"])
-	# UpdatedBy = field_for(Item, "UpdatedBy", dump_only=True)
+	created_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='created_by_id')
+	reviews = fields.Nested(ReviewSchema, many=True, only=["created_date", "rating", "title", "description", "id"])
+	updated_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='updated_by_id')
 	
 	_links = ma.Hyperlinks(
 		{"url": ma.URLFor("item_detail", id="<id>"), "collection": ma.URLFor("items")}
@@ -133,7 +171,7 @@ class ItemSchema(ma.ModelSchema):
 	
 	class Meta:	
 		model = Item
-		#exclude= ('UpdatedBy', "CreatedBy")
+		fields = ("id", 'title', 'description', 'price', 'reviews', 'uppername', 'created_date', 'updated_date', 'created_by', 'updated_by', '_links')
 		include_fk = True
 
 	def make_object(self, data):

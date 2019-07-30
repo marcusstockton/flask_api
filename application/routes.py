@@ -2,12 +2,12 @@ from flask import request, render_template, Response, jsonify, make_response
 from flask_restful import Resource, reqparse
 from datetime import datetime as dt
 from flask import current_app as app
-from .models import db, Item, Review, ItemSchema, ReviewSchema, ItemCreateSchema, User, RevokedTokenModel
-from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
+from .models import db, Item, Review, ItemSchema, ReviewSchema, UserSchema, ItemCreateSchema, User, RevokedTokenModel
 from sqlalchemy.orm import lazyload, joinedload
 import json
 import uuid
 import datetime
+from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 
 
 
@@ -34,12 +34,11 @@ def item_detail(id):
 @app.route("/api/items/<id>", methods=['PUT'])
 @jwt_required
 def item_update(id):
-	#default_user = db.session.query(AspNetUser).first()
 	item = db.session.query(Item).get(id)
 	req_data = request.get_json()
 	schema = ItemSchema()
 	result = schema.load(req_data)
-	
+	Item.update_item(result)
 	try:
 		db.session.merge(result.data)
 		db.session.commit()
@@ -53,11 +52,10 @@ def item_update(id):
 @jwt_required
 def item_create():
 	req_data = request.get_json()
-	#default_user = db.session.query(AspNetUser).first()
 	schema = ItemSchema()
 	result = schema.load(req_data)
 	new_item = result.data
-	#new_item.CreatedById=default_user.Id
+	Item.create_item(new_item)
 	try:
 		db.session.add(new_item)
 		db.session.commit()
@@ -73,8 +71,6 @@ def item_create():
 parser = reqparse.RequestParser()
 parser.add_argument('username', help = 'This field cannot be blank', required = True)
 parser.add_argument('password', help = 'This field cannot be blank', required = True)
-	
-from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 
 
 @app.route("/api/users/register", methods=['POST'])
@@ -89,7 +85,7 @@ def user_registration():
             password = User.generate_hash(data['password']),
 			first_name = data['first_name'],
 			last_name =  data['last_name'],
-			date_of_birth = data['date_of_birth']
+			date_of_birth = data['date_of_birth'],
         )
 	try:
 		new_user.save_to_db()
