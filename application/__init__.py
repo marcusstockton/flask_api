@@ -17,16 +17,11 @@ def create_app():
 	migrate = Migrate(app, db)
 	ma.init_app(app)
 	
-	# app.config.update(
-	# 	TESTING=True,
-	# 	SECRET_KEY=b'_5#y2L"F4Q8z\n\xec]/',
-	# 	SQLALCHEMY_DATABASE_URI='sqlite:///D:\\Dropbox\\Angular Projects\\AngularShoppingSite\\WebServer\\database.db',
-	# 	SQLALCHEMY_TRACK_MODIFICATIONS=False,
-	# 	FLASK_APP='wsgi.py'
-	# )
-
 	with app.app_context():
-		# Imports
-		from . import routes
+		from application.users.routes import user_profile
+		from application.items.routes import itemprofile
+
+		app.register_blueprint(user_profile)
+		app.register_blueprint(itemprofile)	
 
 		return app
