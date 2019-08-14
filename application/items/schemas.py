@@ -19,7 +19,7 @@ class ItemSchema(ma.ModelSchema):
 	
 	class Meta:	
 		model = Item
-		fields = ("id", 'title', 'description', 'price', 'reviews', 'uppername', 'created_date', 'updated_date', 'created_by', 'updated_by', '_links')
+		fields = ("id", 'title', 'description', 'name', 'price', 'reviews', 'uppername', 'created_date', 'created_by_id', 'updated_date', 'created_by', 'updated_by', 'updated_by_id', '_links')
 		include_fk = True
 
 	def make_object(self, data):
@@ -27,9 +27,13 @@ class ItemSchema(ma.ModelSchema):
 		
 	# @pre_load(pass_many=True)
 	# def set_updated(self, data, many):
-		# data["UpdatedDate"] = str(datetime.datetime.now())
+		# data["updated_date"] = str(datetime.datetime.now())
 				
 
 class ItemCreateSchema(ma.Schema):
 	class Meta:
 		fields = ("title", "description", "price", "name")
+
+class ItemUpdateSchema(ma.Schema):
+	class Meta:
+		fields = ("id", 'title', 'description', 'name', 'price')

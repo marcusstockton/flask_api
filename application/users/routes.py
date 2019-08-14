@@ -2,7 +2,7 @@
 from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 from .models import User, RevokedTokenModel
 from flask_restful import Resource, reqparse
-
+import datetime
 from flask import Blueprint, render_template
 
 user_profile = Blueprint('user_profile', __name__)
@@ -48,7 +48,8 @@ def user_login():
 		return {'message': 'User {} doesn\'t exist'.format(data['username'])}
 	
 	if User.verify_hash(data['password'], current_user.password):
-		access_token = create_access_token(identity = data['username'])
+		expires = datetime.timedelta(days=7)
+		access_token = create_access_token(identity = data['username'], expires_delta=expires)
 		refresh_token = create_refresh_token(identity = data['username'])
 		return {
 			'message': 'Logged in as {}'.format(current_user.username),

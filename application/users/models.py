@@ -13,6 +13,13 @@ class User(db.Model):
 	last_name =  db.Column(db.String(120), nullable = True)
 	date_of_birth = db.Column(db.DateTime, nullable=True)
 
+	def __init__(self, username, password, first_name, last_name, date_of_birth):
+		self.username = username
+		self.password = password
+		self.first_name = first_name
+		self.last_name = last_name
+		self.date_of_birth = date_of_birth
+
 	@classmethod
 	def find_by_username(cls, username):
    		return cls.query.filter_by(username = username).first()

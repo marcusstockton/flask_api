@@ -18,3 +18,10 @@ to generate classes from db:
 
 (Python372) D:\Dropbox\Angular Projects\flask-webserver> 
 sqlacodegen sqlite:///../AngularShoppingSite/WebServer/database.db --outfile items --tables Items,Review
+
+
+
+{
+	"username": "marcus",
+	"password": "secret"
+}

@@ -1,13 +1,11 @@
 from application import db, ma
 from application.users.models import User
 from application.reviews.models import Review
-from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
+from flask_jwt_extended import (get_jwt_identity)
 from sqlalchemy import Column, Float, ForeignKey, Integer, LargeBinary, Text
+from sqlalchemy.orm import lazyload
 
 import datetime
-import json
-
-
 
 
 class Item(db.Model):
@@ -37,12 +35,24 @@ class Item(db.Model):
 	
 	@classmethod
 	def create_item(self):
-		self.created_by = get_jwt_identity()
+		logged_in_user = db.session.query(User).filter_by(username=updated_by).first()
+		self.created_by_id = logged_in_user.id
 		db.session.add(self)
 		db.session.commit()
 
 	@classmethod
-	def update_item(self):
-		self.updated_by = get_jwt_identity()
-		db.session.add(self)
+	def update_item(self, item, itemId):
+		breakpoint()
+		updated_by = get_jwt_identity()
+		logged_in_user = db.session.query(User).filter_by(username=updated_by).first()
+		item.data["updated_by_id"] = logged_in_user.id
+		db.session.query(Item).filter_by(id=itemId).update(item.data)
 		db.session.commit()
+
+	@classmethod
+	def get_items(self):
+		return db.session.query(Item).options(lazyload('reviews')).order_by(Item.created_date.desc()).all()
+
+	@classmethod
+	def get_item_by_id(self, id):
+		return db.session.query(Item).options(lazyload('reviews')).get(id)

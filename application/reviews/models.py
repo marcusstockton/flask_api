@@ -26,7 +26,7 @@ class Review(db.Model):
 	updated_by = db.relationship('User', primaryjoin=updated_by_id == User.id, backref="updated_by")
 
 	def __repr__(self):
-		return '<Review {}>'.format(self.Title)
+		return '<Review {}>'.format(self.title)
 
 	@classmethod
 	def create_review(self):

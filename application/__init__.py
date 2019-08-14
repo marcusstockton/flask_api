@@ -20,8 +20,10 @@ def create_app():
 	with app.app_context():
 		from application.users.routes import user_profile
 		from application.items.routes import itemprofile
+		from application.reviews.routes import review_profile
 
 		app.register_blueprint(user_profile)
 		app.register_blueprint(itemprofile)	
+		app.register_blueprint(review_profile)
 
 		return app
