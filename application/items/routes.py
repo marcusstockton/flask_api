@@ -24,13 +24,13 @@ def item_detail(id):
 
 
 @itemprofile.route("/api/items/<id>", methods=['PUT'])
-# @jwt_required
+@jwt_required
 def item_update(id):
 	req_data = request.get_json()
 	schema = ItemUpdateSchema()
 	result = schema.load(req_data)
 	Item.update_item(result, id)
-	return ('', 204)
+	return (jsonify(result), 200)
 		
 
 @itemprofile.route("/api/items/create", methods=['POST'])
@@ -38,13 +38,11 @@ def item_update(id):
 def item_create():
 	req_data = request.get_json()
 	schema = ItemSchema()
-	result = schema.load(req_data)
-	new_item = result.data
+	data = schema.load(req_data)
+	new_item = data.data
 	Item.create_item(new_item)
-	try:
-		db.session.add(new_item)
-		db.session.commit()
-		return ('', 204)
-	except Exception as e:
-		return (e, 400)
+
+	result = schema.dump(new_item).data
+	
+	return (result, 201)
 	
