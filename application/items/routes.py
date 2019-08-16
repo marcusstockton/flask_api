@@ -20,11 +20,11 @@ def item_detail(id):
 	item = Item.get_item_by_id(id)
 	schema = ItemSchema()
 	result = schema.dump(item).data
-	return jsonify(result)
+	return (jsonify(result), 200)
 
 
 @itemprofile.route("/api/items/<id>", methods=['PUT'])
-@jwt_required
+# @jwt_required
 def item_update(id):
 	req_data = request.get_json()
 	schema = ItemUpdateSchema()
@@ -46,5 +46,5 @@ def item_create():
 		db.session.commit()
 		return ('', 204)
 	except Exception as e:
-		breakpoint()
+		return (e, 400)
 	

@@ -17,8 +17,6 @@ class Review(db.Model):
 	description = db.Column(Text)
 
 	item_id = db.Column(db.Integer, db.ForeignKey('Items.id'))
-	item = relationship('Item', foreign_keys=[item_id], backref="item")
-
 	created_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
 	updated_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
 
