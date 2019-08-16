@@ -32,6 +32,12 @@ class Item(db.Model):
 
 	def __repr__(self):
 		return '<Item {}>'.format(self.name)
+
+	def __init__(self, name, title, description, price, *args, **kwargs):
+		self.name = name
+		self.title = title
+		self.description = description
+		self.price = price
 	
 	@classmethod
 	def create_item(self, newItem):
