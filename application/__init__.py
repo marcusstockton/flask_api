@@ -21,9 +21,11 @@ def create_app():
 		from application.users.routes import user_profile
 		from application.items.routes import itemprofile
 		from application.reviews.routes import review_profile
+		from application.addresses.routes import address_profile
 
 		app.register_blueprint(user_profile)
 		app.register_blueprint(itemprofile)	
 		app.register_blueprint(review_profile)
+		app.register_blueprint(address_profile)
 
 		return app

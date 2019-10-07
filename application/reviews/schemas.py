@@ -10,7 +10,7 @@ class ReviewSchema(ma.ModelSchema):
 	updated_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='updated_by_id')
 	class Meta:
 		model = Review
-		fields=('created_date', 'rating', 'title', 'description','created_by', 'updated_by')
+		fields=('created_date', 'rating', 'title', 'description','created_by', 'updated_by', 'id')
 		include_fk = True
 
 	def make_object(self, data):
