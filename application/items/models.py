@@ -1,9 +1,10 @@
 from application import db, ma
 from application.users.models import User
 from application.reviews.models import Review
+from application.attachments.models import Attachment
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import Column, Float, ForeignKey, Integer, LargeBinary, Text
-from sqlalchemy.orm import lazyload
+from sqlalchemy.orm import lazyload, relationship
 
 import datetime
 
@@ -29,6 +30,8 @@ class Item(db.Model):
 	updated_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=True)
 	created_by = db.relationship('User', primaryjoin=created_by_id == User.id)
 	updated_by = db.relationship('User', primaryjoin=updated_by_id == User.id)
+	
+	attachments = db.relationship("Attachment", backref="attachments")
 
 	def __repr__(self):
 		return '<Item {}>'.format(self.name)
@@ -40,10 +43,17 @@ class Item(db.Model):
 		self.price = price
 	
 	@classmethod
-	def create_item(self, newItem):
+	def create_item(self, newItem, attachments):
 		logged_in_user = get_jwt_identity()
 		logged_in_user_id = db.session.query(User.id).filter_by(username=logged_in_user).first()
 		newItem.created_by_id = logged_in_user_id[0]
+		
+		if attachments is not None:
+			# We have attachments, add 'em
+			attachments = Attachment.create_and_add_attachment(attachments)
+			if attachments is not None:
+				newItem.attachments.append(attachments)
+		
 		db.session.add(newItem)
 		db.session.commit()
 
@@ -51,7 +61,8 @@ class Item(db.Model):
 	def update_item(self, item, itemId):
 		updated_by = get_jwt_identity()
 		logged_in_user = db.session.query(User.id).filter_by(username=updated_by).first()
-		item.data["updated_by_id"] = logged_in_user[0]
+		
+		item.data.updated_by_id = logged_in_user[0]
 		db.session.query(Item).filter_by(id=itemId).update(item.data)
 		db.session.commit()
 

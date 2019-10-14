@@ -4,7 +4,7 @@ from .schemas import ItemSchema, ItemCreateSchema, ItemUpdateSchema
 from sqlalchemy.orm import lazyload
 from flask import Blueprint
 from flask_jwt_extended import jwt_required
-
+import json
 
 itemprofile = Blueprint('itemprofile', __name__)
 
@@ -36,13 +36,16 @@ def item_update(id):
 @itemprofile.route("/api/items/create", methods=['POST'])
 @jwt_required
 def item_create():
-	req_data = request.get_json()
-	schema = ItemSchema()
-	data = schema.load(req_data)
-	new_item = data.data
-	Item.create_item(new_item)
+		if 'file' in request.files:
+				raw_data = request.form['data']
+				req_data = json.loads(raw_data)
+		else:
+				req_data = request.get_json()
+		
+		schema = ItemCreateSchema()
+		data = schema.load(req_data)
+		Item.create_item(data, request.files['file'])
+		result = schema.dump(data)
 
-	result = schema.dump(new_item).data
-	
-	return (result, 201)
+		return (result, 201)
 	
