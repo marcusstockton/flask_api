@@ -7,6 +7,7 @@ from sqlalchemy import Column, Float, ForeignKey, Integer, LargeBinary, Text
 from sqlalchemy.orm import lazyload, relationship
 
 import datetime
+import pdb
 
 
 class Item(db.Model):
@@ -60,11 +61,15 @@ class Item(db.Model):
 	@classmethod
 	def update_item(self, item, itemId):
 		updated_by = get_jwt_identity()
-		logged_in_user = db.session.query(User.id).filter_by(username=updated_by).first()
+		logged_in_user = db.session.query(User.id).filter_by(username=updated_by).one()
 		
-		item.data.updated_by_id = logged_in_user[0]
-		db.session.query(Item).filter_by(id=itemId).update(item.data)
+		item.updated_by_id = logged_in_user[0]
+		
+		existingItem = db.session.query(Item).filter_by(id=itemId).first()
+		existingItem.__dict__.update(item.__dict__)
+		db.session.add(existingItem)
 		db.session.commit()
+		return item
 
 	@classmethod
 	def get_items(self):

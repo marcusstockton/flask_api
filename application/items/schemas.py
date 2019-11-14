@@ -10,7 +10,7 @@ class ItemSchema(ma.ModelSchema):
 	created_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='created_by_id')
 	reviews = fields.Nested(ReviewSchema, many=True, only=["created_date", "rating", "title", "description", "id"])
 	updated_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='updated_by_id')
-	attachments = fields.Nested('AttachmentSchema', many=True, only=["created_date", "file_name", "file_extension", "id"])
+	attachments = fields.Nested(AttachmentSchema, many=True, only=["created_date", "file_name", "id", "file_path"])
 	_links = ma.Hyperlinks(
 		{
 			"url": ma.URLFor("itemprofile.item_detail", id="<id>"), 

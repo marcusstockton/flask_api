@@ -48,7 +48,7 @@ class Review(db.Model):
 
 	@classmethod
 	def get_reviews_by_item_id(self, item_id):
-		return db.session.query(Review).filter(Review.item_id == item_id).first()
+		return db.session.query(Review).filter(Review.item_id == item_id)
 
 	@classmethod
 	def get_review_by_id(self, item_id, review_id):

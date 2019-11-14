@@ -5,6 +5,8 @@ from sqlalchemy.orm import lazyload
 from flask import Blueprint
 from flask_jwt_extended import jwt_required
 import json
+import pdb
+
 
 itemprofile = Blueprint('itemprofile', __name__)
 
@@ -19,7 +21,7 @@ def items():
 def item_detail(id):
 	item = Item.get_item_by_id(id)
 	schema = ItemSchema()
-	result = schema.dump(item).data
+	result = schema.dump(item)
 	return (jsonify(result), 200)
 
 
@@ -29,8 +31,9 @@ def item_update(id):
 	req_data = request.get_json()
 	schema = ItemUpdateSchema()
 	result = schema.load(req_data)
-	Item.update_item(result, id)
-	return (jsonify(result), 200)
+	item = Item.update_item(result, id)
+	pdb.set_trace()
+	return schema.jsonify(result)
 		
 
 @itemprofile.route("/api/items/create", methods=['POST'])
