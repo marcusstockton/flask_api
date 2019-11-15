@@ -3,10 +3,10 @@ from application.users.models import User
 from application.reviews.models import Review
 from application.attachments.models import Attachment
 from flask_jwt_extended import get_jwt_identity
-from sqlalchemy import Column, Float, ForeignKey, Integer, LargeBinary, Text
+from sqlalchemy import Column, Float, ForeignKey, Integer, LargeBinary, Text, update
 from sqlalchemy.orm import lazyload, relationship
 
-import datetime
+from datetime import datetime
 import pdb
 
 
@@ -14,8 +14,8 @@ class Item(db.Model):
 	__tablename__ = 'Items'
 
 	id = db.Column(db.Integer, primary_key=True)
-	created_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
-	updated_date = db.Column(db.DateTime, onupdate=datetime.datetime.now())
+	created_date = db.Column(db.DateTime, nullable=False, default=datetime.now())
+	updated_date = db.Column(db.DateTime, onupdate=datetime.now())
 	name = db.Column(Text)
 	title = db.Column(Text)
 	description = db.Column(Text)
@@ -63,13 +63,17 @@ class Item(db.Model):
 		updated_by = get_jwt_identity()
 		logged_in_user = db.session.query(User.id).filter_by(username=updated_by).one()
 		
-		item.updated_by_id = logged_in_user[0]
-		
-		existingItem = db.session.query(Item).filter_by(id=itemId).first()
-		existingItem.__dict__.update(item.__dict__)
-		db.session.add(existingItem)
+		row = db.session.query(Item).filter_by(id=itemId).first()
+		row.description = item.description
+		row.title = item.title
+		row.name = item.name
+		row.price = item.price
+		row.updated_by_id = logged_in_user[0]
+		row.updated_date = datetime.now()
+
+		db.session.merge(row)
 		db.session.commit()
-		return item
+		return row
 
 	@classmethod
 	def get_items(self):
@@ -78,3 +82,8 @@ class Item(db.Model):
 	@classmethod
 	def get_item_by_id(self, id):
 		return db.session.query(Item).options(lazyload('reviews')).get(id)
+
+	@classmethod
+	def delete_item_by_id(self, id):
+		db.session.query(Item).filter_by(id = id).delete()
+		db.session.commit()

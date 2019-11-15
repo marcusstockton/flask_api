@@ -12,14 +12,14 @@ review_profile = Blueprint('review_profile', __name__)
 def get_all_reviews():
     pass
 
-@review_profile.route('/api/items/<itemId>/reviews/', methods=['GET'])
+@review_profile.route('/api/items/<int:itemId>/reviews/', methods=['GET'])
 def reviews_for_item(itemId):
 	review_list = Review.get_reviews_by_item_id(itemId)
 	schema = ReviewSchema(many=True)
 	return schema.jsonify(review_list)
 
 
-@review_profile.route("/api/items/<itemId>/reviews/<id>", methods=['GET'])
+@review_profile.route("/api/items/<int:itemId>/reviews/<id>", methods=['GET'])
 def review_detail(itemId, id):
 	item = Review.get_review_by_id(itemId, id)
 	schema = ReviewSchema()
@@ -27,7 +27,7 @@ def review_detail(itemId, id):
 	return (jsonify(result), 200)
 
 
-@review_profile.route("/api/items/<itemId>/reviews/<id>", methods=['PUT'])
+@review_profile.route("/api/items/<int:itemId>/reviews/<id>", methods=['PUT'])
 @jwt_required
 def review_update(itemId, id):
 	req_data = request.get_json()
@@ -37,7 +37,7 @@ def review_update(itemId, id):
 	return (jsonify(result), 200)
 	
 
-@review_profile.route("/api/items/<itemId>/reviews/create", methods=['POST'])
+@review_profile.route("/api/items/<int:itemId>/reviews/create", methods=['POST'])
 @jwt_required
 def review_create(itemId):
 	req_data = request.get_json()

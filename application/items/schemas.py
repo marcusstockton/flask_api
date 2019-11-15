@@ -47,7 +47,7 @@ class ItemCreateSchema(ma.Schema):
 class ItemUpdateSchema(ma.Schema):
 	class Meta:
 		model = Item
-		fields = ("id", 'title', 'description', 'name', 'price')
+		fields = ('id', 'title', 'description', 'name', 'price')
 
 	@post_load
 	def make_item(self, data, **kwargs):
