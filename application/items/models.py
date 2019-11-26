@@ -63,7 +63,7 @@ class Item(db.Model):
 		updated_by = get_jwt_identity()
 		logged_in_user = db.session.query(User.id).filter_by(username=updated_by).one()
 		
-		row = db.session.query(Item).filter_by(id=itemId).first()
+		row = db.session.query(Item).filter_by(id=itemId).first_or_404()
 		row.description = item.description
 		row.title = item.title
 		row.name = item.name
@@ -81,7 +81,7 @@ class Item(db.Model):
 
 	@classmethod
 	def get_item_by_id(self, id):
-		return db.session.query(Item).options(lazyload('reviews')).get(id)
+		return db.session.query(Item).options(lazyload('reviews')).get_or_404(id)
 
 	@classmethod
 	def delete_item_by_id(self, id):

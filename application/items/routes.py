@@ -18,9 +18,12 @@ def items():
 @itemprofile.route("/api/items/<int:id>", methods=['GET'])
 def item_detail(id):
 	item = Item.get_item_by_id(id)
-	schema = ItemSchema()
-	result = schema.dump(item)
-	return (jsonify(result), 200)
+	if item is None:
+		return ("", 404)
+	else:
+		schema = ItemSchema()
+		result = schema.dump(item)
+		return (jsonify(result), 200)
 
 
 @itemprofile.route("/api/items/<int:id>", methods=['PUT'])
@@ -36,18 +39,18 @@ def item_update(id):
 @itemprofile.route("/api/items/create", methods=['POST'])
 @jwt_required
 def item_create():
-		if 'file' in request.files:
-				raw_data = request.form['data']
-				req_data = json.loads(raw_data)
-		else:
-				req_data = request.get_json()
-		
-		schema = ItemCreateSchema()
-		data = schema.load(req_data)
-		Item.create_item(data, request.files['file'])
-		result = schema.dump(data)
+	if 'file' in request.files:
+			raw_data = request.form['data']
+			req_data = json.loads(raw_data)
+	else:
+			req_data = request.get_json()
+	
+	schema = ItemCreateSchema()
+	data = schema.load(req_data)
+	Item.create_item(data, request.files['file'])
+	result = schema.dump(data)
 
-		return (result, 201)
+	return (result, 201)
 	
 @itemprofile.route("/api/items/<int:id>/delete", methods=['DELETE'])
 @jwt_required
