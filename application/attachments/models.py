@@ -21,7 +21,7 @@ class Attachment(db.Model):
 
 	file_name = db.Column(Text)
 	file_extension = db.Column(Text)
-	file_path = db.Column(Text)
+	file_path = db.Column(Text, nullable=True)
 
 	# Relationship and fk back to Item
 	item = db.relationship('Item', backref="item")

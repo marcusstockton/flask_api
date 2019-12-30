@@ -1,4 +1,4 @@
-from marshmallow import fields, pre_load, post_load
+from marshmallow import fields, pre_load, post_load, EXCLUDE
 from application.items.models import Item
 from application.users.schemas import UserSchema
 from application.reviews.schemas import ReviewSchema
@@ -10,7 +10,7 @@ class ItemSchema(ma.ModelSchema):
 	created_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='created_by_id')
 	reviews = fields.Nested(ReviewSchema, many=True, only=["created_date", "rating", "title", "description", "id"])
 	updated_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='updated_by_id')
-	attachments = fields.Nested(AttachmentSchema, many=True, only=["created_date", "file_name", "id", "file_path"])
+	attachments = fields.Nested(AttachmentSchema, many=True, only=["created_date", "file_name", "id"])
 	_links = ma.Hyperlinks(
 		{
 			"url": ma.URLFor("itemprofile.item_detail", id="<id>"), 
@@ -37,18 +37,21 @@ class ItemCreateSchema(ma.Schema):
 
 	class Meta:	
 		model = Item
-		fields = ("id", 'title', 'description', 'name', 'price', 'reviews', 'attachments','created_date', 'created_by_id', 'created_by')
+		fields = ("id", 'title', 'description', 'price', 'name', 'attachments','created_date', 'created_by_id', 'created_by')
 	
 	@post_load
-	def make_item(self, data, **kwargs):
+	def make_object(self, data, **kwargs):
 		return Item(**data)
 		
 
 class ItemUpdateSchema(ma.Schema):
+	attachments = ma.Nested(AttachmentSchema, many=True, only=["created_date", "file_name", "file_extension", "id"])
+	
 	class Meta:
 		model = Item
-		fields = ('id', 'title', 'description', 'name', 'price')
+		unknown = EXCLUDE
+		fields = ('id', 'title', 'description', 'name', 'price','attachments','created_date')
 
-	@post_load
-	def make_item(self, data, **kwargs):
+	@pre_load
+	def make_object(self, data, **kwargs):
 		return Item(**data)

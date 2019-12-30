@@ -9,7 +9,7 @@ class AttachmentSchema(ma.ModelSchema):
 
 	class Meta:	
 		model = Attachment
-		fields = ("id", 'created_date', 'updated_date', 'created_by_id', 'updated_by_id', 'created_by', 'file_name', 'file_extension', 'item_id', 'updated_by', 'item', "file_path")
+		fields = ("id", 'created_date', 'updated_date', 'created_by_id', 'updated_by_id', 'created_by', 'file_name', 'file_extension', 'item_id', 'updated_by', 'item')
 		include_fk = True
 
 	@post_load

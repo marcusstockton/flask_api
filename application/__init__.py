@@ -3,13 +3,15 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
 db = SQLAlchemy()
 ma = Marshmallow()
 
 def create_app():
 	"""Construct the core application."""
-	app = Flask(__name__, instance_relative_config=False)
+	app = Flask(__name__, instance_relative_config=False, static_folder='./uploads')
+	CORS(app)
 	app.config.from_object('config.Config')
 	app.config['JWT_SECRET_KEY'] = 'jwt-secret-string'
 	jwt = JWTManager(app)
@@ -27,5 +29,7 @@ def create_app():
 		app.register_blueprint(itemprofile)	
 		app.register_blueprint(review_profile)
 		app.register_blueprint(address_profile)
+
+		migrate.init_app(app, db)
 
 		return app

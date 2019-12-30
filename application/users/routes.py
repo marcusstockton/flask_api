@@ -59,7 +59,7 @@ def user_login():
 			identity=data['username'], expires_delta=expires)
 		refresh_token = create_refresh_token(identity=data['username'])
 		return {
-                    'message': 'Logged in as {}'.format(current_user.username),
+                    'user': current_user.username,
                  			'access_token': access_token,
                  			'refresh_token': refresh_token
                 }

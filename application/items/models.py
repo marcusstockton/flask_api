@@ -62,7 +62,6 @@ class Item(db.Model):
 	def update_item(self, item, itemId):
 		updated_by = get_jwt_identity()
 		logged_in_user = db.session.query(User.id).filter_by(username=updated_by).one()
-		
 		row = db.session.query(Item).filter_by(id=itemId).first_or_404()
 		row.description = item.description
 		row.title = item.title
