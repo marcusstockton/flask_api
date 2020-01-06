@@ -13,8 +13,8 @@ class ItemSchema(ma.ModelSchema):
 	attachments = fields.Nested(AttachmentSchema, many=True, only=["created_date", "file_name", "id"])
 	_links = ma.Hyperlinks(
 		{
-			"url": ma.URLFor("itemprofile.item_detail", id="<id>"), 
-			"collection": ma.URLFor("itemprofile.items")
+			"url": ma.URLFor("item_profile.item_detail", id="<id>"), 
+			"collection": ma.URLFor("item_profile.items")
 		}
 	)
 	

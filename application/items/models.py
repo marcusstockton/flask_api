@@ -59,7 +59,7 @@ class Item(db.Model):
 		db.session.commit()
 
 	@classmethod
-	def update_item(self, item, itemId):
+	def update_item(self, item, itemId, attachments):
 		updated_by = get_jwt_identity()
 		logged_in_user = db.session.query(User.id).filter_by(username=updated_by).one()
 		row = db.session.query(Item).filter_by(id=itemId).first_or_404()
@@ -69,6 +69,12 @@ class Item(db.Model):
 		row.price = item.price
 		row.updated_by_id = logged_in_user[0]
 		row.updated_date = datetime.now()
+
+		if attachments is not None:
+			# We have attachments, add 'em
+			attachments = Attachment.create_and_add_attachment(attachments)
+			if attachments is not None:
+				row.attachments.append(attachments)
 
 		db.session.merge(row)
 		db.session.commit()

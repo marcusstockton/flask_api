@@ -42,6 +42,7 @@ class Attachment(db.Model):
 		filename = secure_filename(file.filename)
 		logged_in_user = get_jwt_identity()
 		logged_in_user_id = db.session.query(User.id).filter_by(username=logged_in_user).first()
+
 		new_item = Attachment(
 			file_name = filename,
 			created_date=datetime.datetime.now,
