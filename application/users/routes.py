@@ -22,7 +22,7 @@ def user_registration():
 	data = parser.parse_args()
 
 	if User.find_by_username(data['username']):
-		return {'message': 'User {} already exists'.format(data['username'])}
+		return {'message': 'User {} already exists'.format(data['username'])}, 303
 	
 	dob = datetime.strptime(data['date_of_birth'], '%Y-%m-%d')
 	
@@ -51,7 +51,7 @@ def user_login():
 	data = parser.parse_args()
 	current_user = User.find_by_username(data['username'])
 	if not current_user:
-		return {'message': 'User {} doesn\'t exist'.format(data['username'])}
+		return {'message': 'User {} doesn\'t exist'.format(data['username'])}, 404
 
 	if User.verify_hash(data['password'], current_user.password):
 		expires = timedelta(days=7)

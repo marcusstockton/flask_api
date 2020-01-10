@@ -8,9 +8,9 @@ from application import ma
 class ItemSchema(ma.ModelSchema):
 	uppername = fields.Function(lambda obj: obj.name.upper())
 	created_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='created_by_id')
-	reviews = fields.Nested(ReviewSchema, many=True, only=["created_date", "rating", "title", "description", "id"])
+	reviews = fields.Nested(ReviewSchema, many=True, only=["created_date", "rating", "title", "description", "id", "created_by"])
 	updated_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='updated_by_id')
-	attachments = fields.Nested(AttachmentSchema, many=True, only=["created_date", "file_name", "id"])
+	attachments = fields.Nested(AttachmentSchema, many=True, only=["created_date", "id", 'file_loc'])
 	_links = ma.Hyperlinks(
 		{
 			"url": ma.URLFor("item_profile.item_detail", id="<id>"), 
@@ -32,7 +32,7 @@ class ItemSchema(ma.ModelSchema):
 				
 
 class ItemCreateSchema(ma.Schema):
-	attachments = fields.Nested(AttachmentSchema, many=True, only=["created_date", "file_name", "file_extension", "id"])
+	attachments = fields.Nested(AttachmentSchema, many=True, only=["created_date", "file_extension", "id", 'file_loc'])
 	created_by = fields.Nested("UserSchema", many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='created_by_id')
 
 	class Meta:	
