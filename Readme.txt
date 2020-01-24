@@ -25,3 +25,12 @@ sqlacodegen sqlite:///../AngularShoppingSite/WebServer/database.db --outfile ite
 	"username": "marcus",
 	"password": "secret"
 }
+
+
+
+from application import db
+from application.users.models import User
+import datetime
+u = User(username="marcus", password="secret", first_name="Marcus", last_name="Stockton", date_of_birth=datetime.datetime(1991, 7, 19), avatar="", is_deleted=False)
+db.session.add(u)
+db.session.commit()

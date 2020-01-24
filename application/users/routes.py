@@ -1,68 +1,76 @@
 
 from flask_jwt_extended import (create_access_token, create_refresh_token,
-                                jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
+								jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 from .models import User, RevokedTokenModel
+from application.attachments.models import Attachment
 from flask_restful import Resource, reqparse
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
+from werkzeug.datastructures import FileStorage
+import json
 
 user_profile = Blueprint('user_profile', __name__)
 
 
-parser = reqparse.RequestParser()
-parser.add_argument('username', help='This field cannot be blank', required=True)
-parser.add_argument('password', help='This field cannot be blank', required=True)
-parser.add_argument('first_name', type=str, required=False)
-parser.add_argument('last_name', type=str, required=False)
-parser.add_argument('date_of_birth', type = str, required = False)
-
 
 @user_profile.route("/api/users/register", methods=['POST'])
 def user_registration():
-	data = parser.parse_args()
-
-	if User.find_by_username(data['username']):
-		return {'message': 'User {} already exists'.format(data['username'])}, 303
+	upload = None
+	if 'avatar' in request.files:
+		raw_data = request.form['data']
+		req_data = json.loads(raw_data)
+		upload = request.files['avatar']
+	else:
+		raw_data = request.form['data']
+		req_data = json.loads(raw_data)
 	
-	dob = datetime.strptime(data['date_of_birth'], '%Y-%m-%d')
+	if User.find_by_username(req_data['username']):
+		return {'message': 'User {} already exists'.format(req_data['username'])}, 303
+	
+	dob = datetime.strptime(req_data['date_of_birth'], '%d-%m-%Y')
+
+	if upload:
+		avatar = Attachment.create_and_add_attachment(upload)
 	
 	new_user = User(
-            username=data['username'],
-            password=User.generate_hash(data['password']),
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            date_of_birth=dob
-        )
+			username=req_data['username'],
+			password=User.generate_hash(req_data['password']),
+			first_name=req_data['first_name'],
+			last_name=req_data['last_name'],
+			date_of_birth=dob,
+			avatar=avatar.file_name,
+			is_deleted = False
+		)
 	try:
 		new_user.save_to_db()
-		access_token = create_access_token(identity=data['username'])
-		refresh_token = create_refresh_token(identity=data['username'])
+		access_token = create_access_token(identity=req_data['username'])
+		refresh_token = create_refresh_token(identity=req_data['username'])
 		return {
-                    'message': 'User {} was created'.format(data['username']),
-                 			'access_token': access_token,
-                 			'refresh_token': refresh_token
-                }
+					'message': 'User {} was created'.format(req_data['username']),
+				 			'access_token': access_token,
+				 			'refresh_token': refresh_token
+				}
 	except:
 		return {'message': 'Something went wrong'}, 500
 
 
 @user_profile.route("/api/users/login", methods=['POST'])
 def user_login():
-	data = parser.parse_args()
+	data = json.loads(request.data)
 	current_user = User.find_by_username(data['username'])
 	if not current_user:
 		return {'message': 'User {} doesn\'t exist'.format(data['username'])}, 404
-
+	
 	if User.verify_hash(data['password'], current_user.password):
 		expires = timedelta(days=7)
 		access_token = create_access_token(
 			identity=data['username'], expires_delta=expires)
 		refresh_token = create_refresh_token(identity=data['username'])
 		return {
-                    'user': current_user.username,
-                 			'access_token': access_token,
-                 			'refresh_token': refresh_token
-                }
+					'user': current_user.username,
+				 			'access_token': access_token,
+				 			'refresh_token': refresh_token
+				}
 	else:
 		return {'message': 'Wrong credentials'}
 
@@ -110,3 +118,8 @@ def SecretResource():
 	return {
 		'answer': 42
 	}
+
+@user_profile.route("/api/users/<int:id>/delete", methods=['DELETE'])
+def delete_user(id):
+	User.delete_user(id)
+	return {'message': 'User Deleted sucessfully.'}, 204

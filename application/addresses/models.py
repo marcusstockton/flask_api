@@ -40,6 +40,7 @@ class Address(db.Model):
 
     @classmethod
     def create_address(self, address):
+        ''' Creates an address '''
         logged_in_user = get_jwt_identity()
         current_user = get_current_user()
         raw_jwt = get_raw_jwt()
@@ -52,8 +53,10 @@ class Address(db.Model):
 
     @classmethod
     def get_all(self):
+        ''' Returns all addresses, ordered by created date desc '''
         return db.session.query(Address).order_by(Address.created_date.desc()).all()
 
     @classmethod
     def get_by_id(self, id):
+        ''' Returns the address with the specified id. '''
         return db.session.query(Address).get(id)

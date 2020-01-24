@@ -48,14 +48,17 @@ class Review(db.Model):
 
 	@classmethod
 	def get_reviews_by_item_id(self, item_id):
+		''' Returns all reviews for the selected item id. '''
 		return db.session.query(Review).filter(Review.item_id == item_id)
 
 	@classmethod
 	def get_review_by_id(self, item_id, review_id):
+		''' Returns the review with the specified Id. '''
 		return db.session.query(Review).filter(Review.item_id == item_id).filter(Review.id == review_id).first()
 
 	@classmethod
 	def update_review_by_id(self, item_id, review):
+		''' Updates the review '''
 		updated_by = get_jwt_identity()
 		logged_in_user = db.session.query(
 			User.id).filter_by(username=updated_by).first()
@@ -65,4 +68,6 @@ class Review(db.Model):
 
 	@classmethod
 	def delete_review_by_id(self, item_id, review_id):
-		pass
+		''' Deletes the specified review, on the specified item. '''
+		db.session.query(Review).filter_by(id = id).delete()
+		db.session.commit()

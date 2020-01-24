@@ -45,7 +45,7 @@ def item_update(id):
 		return schema.jsonify(item)
 	except ValidationError as ve:
 		response = jsonify(message=ve.messages)
-		import pdb; pdb.set_trace()
+		#import pdb; pdb.set_trace()
 		# return (response, 500)
 		# return (json.dumps({ "error": ve.messages }), 500)
 		# return Response(ve, status=500,)

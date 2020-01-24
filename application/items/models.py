@@ -82,13 +82,16 @@ class Item(db.Model):
 
 	@classmethod
 	def get_items(self):
+		''' Returns all items, and reviews, ordered by date created. '''
 		return db.session.query(Item).options(lazyload('reviews')).order_by(Item.created_date.desc()).all()
 
 	@classmethod
 	def get_item_by_id(self, id):
+		''' Returns the item with the specified Id. '''
 		return db.session.query(Item).options(lazyload('reviews')).get_or_404(id)
 
 	@classmethod
 	def delete_item_by_id(self, id):
+		''' Deletes the item with the specified Id. '''
 		db.session.query(Item).filter_by(id = id).delete()
 		db.session.commit()
