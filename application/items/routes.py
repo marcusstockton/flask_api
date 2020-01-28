@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from .models import db, Item
 from .schemas import ItemSchema, ItemCreateSchema, ItemUpdateSchema
+from .item_service import get_item_by_id, get_items
 from sqlalchemy.orm import lazyload
 from flask import Blueprint, Response, abort
 from flask_jwt_extended import jwt_required
@@ -11,14 +12,14 @@ item_profile = Blueprint('item_profile', __name__)
 
 @item_profile.route('/api/items', methods=['GET'])
 def items():
-	items = Item.get_items()
+	items = get_items()
 	schema = ItemSchema(many=True)
 	return schema.jsonify(items)
 
 
 @item_profile.route("/api/items/<int:id>", methods=['GET'])
 def item_detail(id):
-	item = Item.get_item_by_id(id)
+	item = get_item_by_id(id)
 	if item is None:
 		return ("", 404)
 	else:
@@ -55,7 +56,6 @@ def item_update(id):
 @item_profile.route("/api/items/create", methods=['POST'])
 @jwt_required
 def item_create():
-	
 	if 'file' in request.files:
 		raw_data = request.form['data']
 		req_data = json.loads(raw_data)

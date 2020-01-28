@@ -5,7 +5,7 @@ from application.attachments.models import Attachment
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import Column, Float, ForeignKey, Integer, LargeBinary, Text, update
 from sqlalchemy.orm import lazyload, relationship
-
+from application.users.user_service import find_by_username
 from datetime import datetime
 import pdb
 
@@ -46,8 +46,9 @@ class Item(db.Model):
 	@classmethod
 	def create_item(self, newItem, attachments):
 		logged_in_user = get_jwt_identity()
-		logged_in_user_id = db.session.query(User.id).filter_by(username=logged_in_user).first()
-		newItem.created_by_id = logged_in_user_id[0]
+		#import pdb; pdb.set_trace()
+		logged_in_user_id = find_by_username(logged_in_user).id
+		newItem.created_by_id = logged_in_user_id
 		
 		if attachments is not None:
 			# We have attachments, add 'em
@@ -79,16 +80,6 @@ class Item(db.Model):
 		db.session.merge(row)
 		db.session.commit()
 		return row
-
-	@classmethod
-	def get_items(self):
-		''' Returns all items, and reviews, ordered by date created. '''
-		return db.session.query(Item).options(lazyload('reviews')).order_by(Item.created_date.desc()).all()
-
-	@classmethod
-	def get_item_by_id(self, id):
-		''' Returns the item with the specified Id. '''
-		return db.session.query(Item).options(lazyload('reviews')).get_or_404(id)
 
 	@classmethod
 	def delete_item_by_id(self, id):

@@ -5,5 +5,5 @@ from application import ma
 class UserSchema(ma.ModelSchema):
 	class Meta:
 		model = User
-		fields=("username", "first_name", "last_name", "date_of_birth", "id")
+		fields=("username", "first_name", "last_name", "date_of_birth", "id", "avatar", "is_deleted")
 		include_fk=True

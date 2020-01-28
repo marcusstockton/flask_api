@@ -1,6 +1,8 @@
 
 from flask_jwt_extended import (create_access_token, create_refresh_token,
 								jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
+from .user_service import get_all_users, find_by_username
+from .schemas import UserSchema
 from .models import User, RevokedTokenModel
 from application.attachments.models import Attachment
 from flask_restful import Resource, reqparse
@@ -24,7 +26,7 @@ def user_registration():
 		raw_data = request.form['data']
 		req_data = json.loads(raw_data)
 	
-	if User.find_by_username(req_data['username']):
+	if find_by_username(req_data['username']):
 		return {'message': 'User {} already exists'.format(req_data['username'])}, 303
 	
 	dob = datetime.strptime(req_data['date_of_birth'], '%d-%m-%Y')
@@ -109,7 +111,9 @@ def token_refresh():
 
 @user_profile.route("/api/users/all_users", methods=['GET'])
 def all_users():
-	return User.return_all()
+	users = get_all_users()
+	schema = UserSchema(many=True)
+	return schema.jsonify(users)
 
 
 @user_profile.route("/api/users/secret", methods=['GET'])
