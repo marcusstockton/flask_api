@@ -1,18 +1,15 @@
 
 from flask_jwt_extended import (create_access_token, create_refresh_token,
 								jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
-from .user_service import get_all_users, find_by_username
-from .schemas import UserSchema
-from .models import User, RevokedTokenModel
-from application.attachments.models import Attachment
-from flask_restful import Resource, reqparse
+from application.users.user_service import get_all_users, find_by_username, create_new_user, delete_user, verify_hash
+from application.attachments.attachment_service import create_and_add_attachment
+from application.users.schemas import UserSchema
+from flask_restful import Resource
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, request
-from werkzeug.datastructures import FileStorage
+from flask import Blueprint, request
 import json
 
 user_profile = Blueprint('user_profile', __name__)
-
 
 
 @user_profile.route("/api/users/register", methods=['POST'])
@@ -26,25 +23,20 @@ def user_registration():
 		raw_data = request.form['data']
 		req_data = json.loads(raw_data)
 	
-	if find_by_username(req_data['username']):
+	user = find_by_username(req_data['username'])
+	if user:
 		return {'message': 'User {} already exists'.format(req_data['username'])}, 303
 	
 	dob = datetime.strptime(req_data['date_of_birth'], '%d-%m-%Y')
 
 	if upload:
-		avatar = Attachment.create_and_add_attachment(upload)
+		avatar = create_and_add_attachment(upload, user)
 	
-	new_user = User(
-			username=req_data['username'],
-			password=User.generate_hash(req_data['password']),
-			first_name=req_data['first_name'],
-			last_name=req_data['last_name'],
-			date_of_birth=dob,
-			avatar=avatar.file_name,
-			is_deleted = False
-		)
+	req_data['avatar'] = avatar.file_path
+	
 	try:
-		new_user.save_to_db()
+		user = create_new_user(req_data)
+		
 		access_token = create_access_token(identity=req_data['username'])
 		refresh_token = create_refresh_token(identity=req_data['username'])
 		return {
@@ -59,20 +51,20 @@ def user_registration():
 @user_profile.route("/api/users/login", methods=['POST'])
 def user_login():
 	data = json.loads(request.data)
-	current_user = User.find_by_username(data['username'])
+	current_user = find_by_username(data['username'])
 	if not current_user:
 		return {'message': 'User {} doesn\'t exist'.format(data['username'])}, 404
 	
-	if User.verify_hash(data['password'], current_user.password):
+	if verify_hash(data['password'], current_user.password):
 		expires = timedelta(days=7)
 		access_token = create_access_token(
 			identity=data['username'], expires_delta=expires)
 		refresh_token = create_refresh_token(identity=data['username'])
 		return {
-					'user': current_user.username,
-				 			'access_token': access_token,
-				 			'refresh_token': refresh_token
-				}
+			'user': current_user.username,
+			'access_token': access_token,
+			'refresh_token': refresh_token
+		}
 	else:
 		return {'message': 'Wrong credentials'}
 
@@ -125,5 +117,5 @@ def SecretResource():
 
 @user_profile.route("/api/users/<int:id>/delete", methods=['DELETE'])
 def delete_user(id):
-	User.delete_user(id)
+	delete_user(id)
 	return {'message': 'User Deleted sucessfully.'}, 204

@@ -1,8 +1,4 @@
-import json
-
 from application import db, ma
-from passlib.hash import pbkdf2_sha256 as sha256
-from sqlalchemy import func
 
 class User(db.Model):
 	__tablename__ = 'Users'
@@ -24,55 +20,6 @@ class User(db.Model):
 		self.date_of_birth = date_of_birth
 		self.avatar = avatar
 		self.is_deleted = is_deleted
-
-	@classmethod
-	def get_user_by_id(cls, id):
-		''' Returns the user with the specified Id. '''
-		return cls.query.get(id)
-
-	@classmethod
-	def find_by_username(cls, user):
-		''' Returns the user with the specified username. '''
-		return cls.query.filter(func.lower(cls.username) == func.lower(user)).first()
-
-	@classmethod
-	def return_all(cls):
-		''' Returns a list of all users. '''
-		def to_json(x):
-			return {
-				'username': x.username,
-				'password': x.password,
-				'id': x.id,
-				'date_of_birth': x.date_of_birth,
-				'first_name': x.first_name,
-				'last_name': x.last_name,
-				'avatar': x.avatar,
-				'is_deleted': x.is_deleted
-			}
-		
-		user_list = cls.query.all()
-		return {'users': list(map(lambda x: to_json(x), user_list))}
-
-	@classmethod
-	def delete_user(cls, id):
-		user = cls.query.filter_by(id = id).first()
-		db.session.delete(user)
-		db.session.commit()
-
-
-	@staticmethod
-	def generate_hash(password):
-		''' Generates a password hash. '''
-		return sha256.hash(password)
-
-	@staticmethod
-	def verify_hash(password, hash):
-		''' Verifies a password and hash. '''
-		return sha256.verify(password, hash)
-
-	def save_to_db(self):
-		db.session.add(self)
-		db.session.commit()
 
 
 class RevokedTokenModel(db.Model):

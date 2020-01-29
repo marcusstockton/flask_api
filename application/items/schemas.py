@@ -7,7 +7,7 @@ from application import ma
 
 class ItemSchema(ma.ModelSchema):
 	uppername = fields.Function(lambda obj: obj.name.upper())
-	created_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='created_by_id')
+	created_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth', "avatar"], kwargs='created_by_id')
 	reviews = fields.Nested(ReviewSchema, many=True, only=["created_date", "rating", "title", "description", "id", "created_by"])
 	updated_by = fields.Nested(UserSchema, many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='updated_by_id')
 	attachments = fields.Nested(AttachmentSchema, many=True, only=["created_date", "id", 'file_loc'])
@@ -20,7 +20,7 @@ class ItemSchema(ma.ModelSchema):
 	
 	class Meta:	
 		model = Item
-		fields = ("id", 'title', 'description', 'name', 'price', 'reviews', 'uppername', 'created_date', 'created_by_id', 'updated_date', 'created_by', 'updated_by', 'updated_by_id', 'attachments', '_links')
+		fields = ("id", 'title', 'description', 'name', 'price', 'reviews', 'uppername', 'created_date', 'updated_date', 'created_by', 'updated_by', 'attachments', '_links')
 		include_fk = True
 
 	def make_object(self, data):

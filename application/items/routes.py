@@ -13,8 +13,9 @@ item_profile = Blueprint('item_profile', __name__)
 @item_profile.route('/api/items', methods=['GET'])
 def items():
 	items = get_items()
+	#import pdb; pdb.set_trace()
 	schema = ItemSchema(many=True)
-	return schema.jsonify(items)
+	return schema.jsonify(items), 200
 
 
 @item_profile.route("/api/items/<int:id>", methods=['GET'])
@@ -24,8 +25,7 @@ def item_detail(id):
 		return ("", 404)
 	else:
 		schema = ItemSchema()
-		result = schema.dump(item)
-		return (jsonify(result), 200)
+		return schema.jsonify(item), 200
 
 
 @item_profile.route("/api/items/<int:id>", methods=['PUT'])
@@ -45,7 +45,7 @@ def item_update(id):
 		item = Item.update_item(result, id, upload)
 		return schema.jsonify(item)
 	except ValidationError as ve:
-		response = jsonify(message=ve.messages)
+		#response = jsonify(message=ve.messages)
 		#import pdb; pdb.set_trace()
 		# return (response, 500)
 		# return (json.dumps({ "error": ve.messages }), 500)

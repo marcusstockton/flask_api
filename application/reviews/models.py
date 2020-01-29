@@ -11,8 +11,7 @@ class Review(db.Model):
 	__tablename__ = 'Review'
 
 	id = db.Column(db.Integer, primary_key=True)
-	created_date = db.Column(db.DateTime, nullable=False,
-	                         default=datetime.datetime.now())
+	created_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
 	updated_date = db.Column(db.DateTime, onupdate=datetime.datetime.now())
 	rating = db.Column(Integer, nullable=False)
 	title = db.Column(Text)
@@ -20,12 +19,10 @@ class Review(db.Model):
 
 	item_id = db.Column(db.Integer, db.ForeignKey('Items.id'))
 	created_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
-	updated_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+	created_by = relationship('User',  foreign_keys='Review.created_by_id')
 
-	created_by = db.relationship(
-		'User', primaryjoin=created_by_id == User.id, backref="created_by")
-	updated_by = db.relationship(
-		'User', primaryjoin=updated_by_id == User.id, backref="updated_by")
+	updated_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+	updated_by = relationship('User',  foreign_keys='Review.updated_by_id')
 
 	def __repr__(self):
 		return '<Review {}>'.format(self.title)

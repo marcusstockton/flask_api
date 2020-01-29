@@ -1,5 +1,6 @@
 from application import db, ma
 from sqlalchemy import Column, Float, ForeignKey, Integer, LargeBinary, Text
+from sqlalchemy.orm import relationship
 from application.users.models import User
 from flask_jwt_extended import get_jwt_identity, get_current_user, get_raw_jwt
 import datetime
@@ -13,9 +14,10 @@ class Address(db.Model):
     created_date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now())
     updated_date = db.Column(db.DateTime, onupdate=datetime.datetime.now())
     created_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+    created_by = relationship('User',  foreign_keys='Address.created_by_id')
+    
     updated_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=True)
-    created_by = db.relationship('User', primaryjoin=created_by_id == User.id)
-    updated_by = db.relationship('User', primaryjoin=updated_by_id == User.id)
+    updated_by = relationship('User',  foreign_keys='Address.updated_by_id')
 
     address_line_1 = db.Column(Text, nullable=False)
     address_line_2 = db.Column(Text)

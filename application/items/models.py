@@ -1,13 +1,10 @@
 from application import db, ma
-from application.users.models import User
-from application.reviews.models import Review
-from application.attachments.models import Attachment
+from application.attachments.attachment_service import create_and_add_attachment
 from flask_jwt_extended import get_jwt_identity
-from sqlalchemy import Column, Float, ForeignKey, Integer, LargeBinary, Text, update
-from sqlalchemy.orm import lazyload, relationship
+from sqlalchemy import Column, Float, ForeignKey, Integer, Text, update
+from sqlalchemy.orm import relationship
 from application.users.user_service import find_by_username
 from datetime import datetime
-import pdb
 
 
 class Item(db.Model):
@@ -28,9 +25,10 @@ class Item(db.Model):
 		order_by='desc(Review.created_date)'
 	)
 	created_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'))
+	created_by = relationship('User',  foreign_keys='Item.created_by_id')
+
 	updated_by_id = db.Column(db.Integer, db.ForeignKey('Users.id'), nullable=True)
-	created_by = db.relationship('User', primaryjoin=created_by_id == User.id)
-	updated_by = db.relationship('User', primaryjoin=updated_by_id == User.id)
+	updated_by = relationship('User',  foreign_keys='Item.updated_by_id')
 	
 	attachments = db.relationship("Attachment", backref="attachments")
 
@@ -52,7 +50,7 @@ class Item(db.Model):
 		
 		if attachments is not None:
 			# We have attachments, add 'em
-			attachments = Attachment.create_and_add_attachment(attachments)
+			attachments = create_and_add_attachment(attachments, logged_in_user)
 			if attachments is not None:
 				newItem.attachments.append(attachments)
 		
@@ -73,7 +71,7 @@ class Item(db.Model):
 
 		if attachments is not None:
 			# We have attachments, add 'em
-			attachments = Attachment.create_and_add_attachment(attachments)
+			attachments = create_and_add_attachment(attachments, logged_in_user)
 			if attachments is not None:
 				row.attachments.append(attachments)
 
