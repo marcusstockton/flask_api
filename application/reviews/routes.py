@@ -43,7 +43,6 @@ def review_create(itemId):
 	req_data = request.get_json()
 	schema = ReviewCreateSchema()
 	data = schema.load(req_data)
-	breakpoint()
 	new_review = data.data
 	new_review.item_id = itemId
 	

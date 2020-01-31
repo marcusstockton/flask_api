@@ -25,7 +25,7 @@ class Review(db.Model):
 	updated_by = relationship('User',  foreign_keys='Review.updated_by_id')
 
 	def __repr__(self):
-		return '<Review {}>'.format(self.title)
+		return '<Review {}>'.format(self.__dict__)
 
 	def __init__(self, rating, title, description, *args, **kwargs):
 		self.title = title

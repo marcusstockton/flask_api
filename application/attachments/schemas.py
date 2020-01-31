@@ -1,5 +1,6 @@
 from marshmallow import fields, pre_load, post_load
 from application.attachments.models import Attachment
+from application.attachments.attachment_service import create_attachment_url
 from application import ma
 
 
@@ -7,7 +8,7 @@ from application import ma
 class AttachmentUrlBuilder(fields.Field):
 	def _serialize(self, value, sttr, obj, **kwargs):
 		if value is not None:
-			return "http://localhost:5000/uploads/" + value
+			return create_attachment_url(value)
 
 class AttachmentSchema(ma.ModelSchema):
 	created_by = fields.Nested("UserSchema", many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='created_by_id')

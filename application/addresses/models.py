@@ -28,7 +28,7 @@ class Address(db.Model):
     main_phone_number = db.Column(Text)
 
     def __repr__(self):
-        return '<Address {}>'.format(self.address_line_1)
+        return '<Address {}>'.format(self.__dict__)
 
     def __init__(self, address_line_1, address_line_2, address_line_3, postcode, city, county, main_phone_number, *args, **kwargs):
         self.address_line_1 = address_line_1

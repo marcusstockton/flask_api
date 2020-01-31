@@ -1,11 +1,9 @@
-import os
 from application import db, ma
 from flask_jwt_extended import get_jwt_identity
 from sqlalchemy import Column, Float, ForeignKey, Integer, LargeBinary, Text
 from sqlalchemy.orm import lazyload, relationship
-from werkzeug.utils import secure_filename
 import datetime
-from flask import current_app as app
+
 
 class Attachment(db.Model):
 	__tablename__ = 'Attachments'
@@ -21,7 +19,7 @@ class Attachment(db.Model):
 	file_path = db.Column(Text, nullable=True)
 
 	def __repr__(self):
-		return '<Attachment {}>'.format(self.file_name)
+		return '<Attachment {}>'.format(self.__dict__)
 
 	def __init__(self, file_name, file_extension, *args, **kwargs):
 		self.file_name = file_name
