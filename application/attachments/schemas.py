@@ -13,12 +13,12 @@ class AttachmentUrlBuilder(fields.Field):
 class AttachmentSchema(ma.ModelSchema):
 	created_by = fields.Nested("UserSchema", many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='created_by_id')
 	updated_by = fields.Nested("UserSchema", many=False, only=["username", 'first_name', 'last_name', 'date_of_birth'], kwargs='updated_by_id')
-	file_loc = AttachmentUrlBuilder(attribute="file_name")
+	file_loc = AttachmentUrlBuilder(attribute="file_name", allow_none=True)
 	item = fields.Nested("ItemSchema", many=False, kwargs='item_id')
 
 	class Meta:	
 		model = Attachment
-		fields = ("id", 'created_date', 'updated_date', 'created_by_id', 'updated_by_id', 'created_by', 'file_extension', 'item_id', 'updated_by', 'item', 'file_loc')
+		fields = ("id", 'created_date', 'updated_date', 'created_by_id', 'updated_by_id', 'created_by', 'file_extension', 'item_id', 'updated_by', 'item', 'file_loc', 'file_path')
 		include_fk = True
 
 	@post_load

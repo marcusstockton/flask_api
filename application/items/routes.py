@@ -15,6 +15,7 @@ item_profile = Blueprint('item_profile', __name__)
 def items():
 	items = get_items()
 	schema = ItemSchema(many=True)
+	#import pdb; pdb.set_trace()
 	return schema.jsonify(items), 200
 
 
@@ -40,27 +41,6 @@ def item_update(id):
 		
 	updated_item = update_item(id, item, upload, get_jwt_identity())
 	return schema.jsonify(updated_item)
-
-	# upload = None
-	# if 'file' in request.files:
-	# 	raw_data = request.form['data']
-	# 	req_data = json.loads(raw_data)
-	# 	upload = request.files['file']
-	# else:
-	# 	raw_data = request.form['data']
-	# 	req_data = json.loads(raw_data)
-	# schema = ItemSchema()
-	# try:
-	# 	result = schema.from_dict(req_data)
-	# 	item = Item.update_item(result, id, upload)
-	# 	return schema.jsonify(item)
-	# except ValidationError as ve:
-	# 	#response = jsonify(message=ve.messages)
-	# 	#import pdb; pdb.set_trace()
-	# 	# return (response, 500)
-	# 	# return (json.dumps({ "error": ve.messages }), 500)
-	# 	# return Response(ve, status=500,)
-	# 	abort(ve, description=ve.messages)
 		
 
 @item_profile.route("/api/items/create", methods=['POST'])

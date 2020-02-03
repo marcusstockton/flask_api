@@ -32,39 +32,39 @@ class Review(db.Model):
 		self.rating = rating
 		self.description = description
 
-	@classmethod
-	def create_review(self, data):
-		logged_in_user = get_jwt_identity()
-		logged_in_user_id = db.session.query(
-			User.id).filter_by(username=logged_in_user).first()
+	# @classmethod
+	# def create_review(self, data):
+	# 	logged_in_user = get_jwt_identity()
+	# 	logged_in_user_id = db.session.query(
+	# 		User.id).filter_by(username=logged_in_user).first()
 
-		data.created_by_id = logged_in_user_id[0]
-		breakpoint()
-		db.session.add(data)
-		db.session.commit()
+	# 	data.created_by_id = logged_in_user_id[0]
+	# 	breakpoint()
+	# 	db.session.add(data)
+	# 	db.session.commit()
 
-	@classmethod
-	def get_reviews_by_item_id(self, item_id):
-		''' Returns all reviews for the selected item id. '''
-		return db.session.query(Review).filter(Review.item_id == item_id)
+	# @classmethod
+	# def get_reviews_by_item_id(self, item_id):
+	# 	''' Returns all reviews for the selected item id. '''
+	# 	return db.session.query(Review).filter(Review.item_id == item_id)
 
-	@classmethod
-	def get_review_by_id(self, item_id, review_id):
-		''' Returns the review with the specified Id. '''
-		return db.session.query(Review).filter(Review.item_id == item_id).filter(Review.id == review_id).first()
+	# @classmethod
+	# def get_review_by_id(self, item_id, review_id):
+	# 	''' Returns the review with the specified Id. '''
+	# 	return db.session.query(Review).filter(Review.item_id == item_id).filter(Review.id == review_id).first()
 
-	@classmethod
-	def update_review_by_id(self, item_id, review):
-		''' Updates the review '''
-		updated_by = get_jwt_identity()
-		logged_in_user = db.session.query(
-			User.id).filter_by(username=updated_by).first()
-		review.data["updated_by_id"] = logged_in_user[0]
-		db.session.query(Review).filter_by(id=review.data.id).update(review.data)
-		db.session.commit()
+	# @classmethod
+	# def update_review_by_id(self, item_id, review):
+	# 	''' Updates the review '''
+	# 	updated_by = get_jwt_identity()
+	# 	logged_in_user = db.session.query(
+	# 		User.id).filter_by(username=updated_by).first()
+	# 	review.data["updated_by_id"] = logged_in_user[0]
+	# 	db.session.query(Review).filter_by(id=review.data.id).update(review.data)
+	# 	db.session.commit()
 
-	@classmethod
-	def delete_review_by_id(self, item_id, review_id):
-		''' Deletes the specified review, on the specified item. '''
-		db.session.query(Review).filter_by(id = id).delete()
-		db.session.commit()
+	# @classmethod
+	# def delete_review_by_id(self, item_id, review_id):
+	# 	''' Deletes the specified review, on the specified item. '''
+	# 	db.session.query(Review).filter_by(id = id).delete()
+	# 	db.session.commit()

@@ -2,9 +2,10 @@ from application import db
 from application.users.models import User
 from sqlalchemy import func
 from passlib.hash import pbkdf2_sha256 as sha256
+from datetime import datetime
 
 def get_user_by_id(data):
-	return User.query.get(data['id'])
+	return User.query.get(data)
 
 
 def find_by_username(user_name):

@@ -16,19 +16,14 @@ user_profile = Blueprint('user_profile', __name__)
 def user_registration():
 	upload = None
 	if 'avatar' in request.files:
-		raw_data = request.form['data']
-		req_data = json.loads(raw_data)
 		upload = request.files['avatar']
-	else:
-		raw_data = request.form['data']
-		req_data = json.loads(raw_data)
 	
+	raw_data = request.form['data']
+	req_data = json.loads(raw_data)
 	user = find_by_username(req_data['username'])
 	if user:
 		return {'message': 'User {} already exists'.format(req_data['username'])}, 303
 	
-	dob = datetime.strptime(req_data['date_of_birth'], '%d-%m-%Y')
-
 	if upload:
 		avatar = create_and_add_attachment(upload, user)
 	
@@ -117,5 +112,8 @@ def SecretResource():
 
 @user_profile.route("/api/users/<int:id>/delete", methods=['DELETE'])
 def delete_user(id):
-	delete_user(id)
-	return {'message': 'User Deleted sucessfully.'}, 204
+	try:
+		delete_user(id)
+		return {'message': 'User Deleted sucessfully.'}, 204
+	except Exception as e:
+		return e, 500

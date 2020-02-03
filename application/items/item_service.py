@@ -1,17 +1,20 @@
 from application import db
 from application.items.models import Item
 from application.attachments.attachment_service import create_and_add_attachment
+from application.users.user_service import find_by_username
 from sqlalchemy.orm import lazyload, joinedload
 import datetime
 
 def get_items():
 	''' Returns a list of all items ordered in created_date descending order '''
-	return db.session.query(Item).options(lazyload('reviews')).order_by(Item.created_date.desc()).all()
+	items = db.session.query(Item).options(lazyload('reviews'), lazyload('attachments')).order_by(Item.created_date.desc()).all()
+	#import pdb; pdb.set_trace()
+	return items
 
 
 def get_item_by_id(id):
 	''' Returns the Item with the specified Id '''
-	return Item.query.options(lazyload('reviews')).filter_by(id=id).first()
+	return Item.query.options(lazyload('reviews'), lazyload('attachments')).filter_by(id=id).first()
 
 
 def delete_item_by_id(id):
@@ -35,7 +38,7 @@ def update_item(itemId, item, attachment, userId):
 		row.title = item['title']
 		row.name = item['name']
 		row.price = item['price']
-		row.updated_by_id = userId
+		row.updated_by_id = find_by_username(userId).id
 		row.updated_date = datetime.datetime.now()
 
 		if attachment:
